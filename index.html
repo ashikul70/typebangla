@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TypeBangla — Connected to ATSGO</title>
+<title>TypeBangla v22 — Smart Flow, Auth & Clear Completion</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
@@ -23,7 +23,7 @@ nav{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);padd
 .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;}
 .logo em{color:var(--accent);font-style:normal;}
 
-/* Auth UI */
+/* Auth UI Elements */
 .auth-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10, 13, 19, 0.95);backdrop-filter:blur(10px);z-index:9999;display:flex;align-items:center;justify-content:center;transition:0.3s opacity;}
 .auth-overlay.hidden {opacity:0;pointer-events:none;}
 .auth-card {background:var(--surface);border:1px solid var(--border);padding:40px;border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;width:100%;max-width:400px;}
@@ -32,25 +32,40 @@ nav{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);padd
 .auth-btn {width:100%;padding:12px;border-radius:8px;border:none;font-size:1rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:15px;transition:0.2s;}
 .auth-btn.google {background:white;color:#333;}
 .auth-btn.google:hover {background:#f1f1f1;}
+.auth-btn.other {background:var(--surface2);color:var(--ink);border:1px solid var(--border);}
+.auth-btn.other:hover {background:var(--border);}
 
+/* Profile Button */
 .profile-btn {background:none;border:none;cursor:pointer;border-radius:50%;width:40px;height:40px;overflow:hidden;border:2px solid var(--border);transition:0.2s;display:none;}
 .profile-btn:hover {border-color:var(--accent);}
 .profile-btn img {width:100%;height:100%;object-fit:cover;}
 
+/* Settings/Account Popup */
 .user-popup {position:absolute;top:65px;left:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;width:260px;box-shadow:var(--shadow);z-index:100;transform:translateY(-10px);opacity:0;pointer-events:none;transition:0.2s ease;}
 .user-popup.show {transform:translateY(0);opacity:1;pointer-events:all;}
 .user-popup-header {display:flex;flex-direction:column;align-items:center;border-bottom:1px solid var(--border);padding-bottom:15px;margin-bottom:15px;text-align:center;}
 .user-popup-header img {width:60px;height:60px;border-radius:50%;margin-bottom:10px;border:2px solid var(--accent);}
+.user-popup-header h3 {font-size:1.1rem;margin-bottom:5px;}
+.user-popup-header p {font-size:0.85rem;color:var(--ink2);}
 .logout-btn {width:100%;padding:10px;background:rgba(248,113,113,0.1);color:var(--incorrect);border:1px solid var(--incorrect);border-radius:6px;font-weight:600;cursor:pointer;transition:0.2s;}
+.logout-btn:hover {background:var(--incorrect);color:white;}
 
-/* Core App Styling */
+/* Layout & App Structure */
 .layout{display:flex;flex:1;overflow:hidden;}
 .sidebar{width:340px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;}
 .sidebar-header{padding:15px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;}
-.lesson-list{overflow-y:auto;flex:1;}
-.li{padding:12px 15px;cursor:pointer;border-left:4px solid transparent;border-bottom:1px solid var(--border);font-size:0.85rem;display:flex;justify-content:space-between;align-items:center; gap: 8px;}
+.lesson-list{overflow-y:auto;flex:1;scroll-behavior:smooth;}
+.li{padding:12px 15px;cursor:pointer;border-left:4px solid transparent;transition:0.2s;border-bottom:1px solid var(--border);font-size:0.85rem;display:flex;justify-content:space-between;align-items:center; gap: 8px;}
+.li:hover{background:var(--surface);}
 .li.active{border-left-color:var(--accent);background:var(--surface2);}
 .li.completed {border-left-color: var(--correct);background: rgba(45, 212, 160, 0.08);}
+.li.completed .li-text {text-decoration: line-through;color: var(--ink2);opacity: 0.6;}
+.li-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.actions {display:flex; gap:6px;}
+.icon-btn{background:none;border:none;cursor:pointer;opacity:0.5;font-size:1.1rem;transition:0.2s;}
+.icon-btn:hover{opacity:1;transform:scale(1.1);}
+.btn-check{color:var(--correct);}
+.btn-del{color:var(--incorrect);}
 
 .main{flex:1;display:flex;flex-direction:column;background:var(--bg);}
 .meanings-strip{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;min-height:65px;}
@@ -65,42 +80,66 @@ nav{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);padd
 .ch.cursor{border-bottom:3px solid var(--cursor);animation:blink 1s infinite;}
 @keyframes blink { 50% { border-color: transparent; } }
 
+.enter-hint{display:none;align-items:center;gap:10px;background:rgba(45,212,160,0.12);border:1px solid var(--correct);border-radius:8px;padding:10px 18px;font-size:0.9rem;color:var(--correct);font-weight:600;animation:fadeIn 0.3s ease;}
+.enter-hint.show{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.enter-hint kbd{background:var(--correct);color:var(--bg);border-radius:4px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;}
+
+.bn-card{background:var(--surface2);border-radius:var(--radius);padding:20px;display:none;border-left:5px solid var(--accent);box-shadow:var(--shadow);}
+.bn-card.show{display:block;}
+.bn-text{font-family:'Noto Sans Bengali',sans-serif;font-size:1.3rem;line-height:1.6;color:#fff;}
+
 .keyboard{display:flex;flex-direction:column;gap:8px;background:var(--surface);padding:20px;border-radius:var(--radius);border:1px solid var(--border);margin-top:auto;}
 .key-row{display:flex;gap:8px;justify-content:center;}
-.key{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:12px 0;flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:1rem;color:var(--ink2);}
+.key{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:12px 0;flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:1rem;color:var(--ink2);transition:0.1s ease;text-transform:uppercase;}
+.key.wide{flex:2;}
 .key.space{flex:10;}
-.key.target{background:var(--accent);color:white;}
-.key.pressed{background:var(--correct);color:var(--bg);}
+.key.enter{flex:2.5;}
+.key.target{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 0 15px rgba(232,81,42,0.5);transform:scale(1.05);z-index:2;font-weight:bold;}
+.key.target-enter{background:var(--correct);color:var(--bg);border-color:var(--correct);box-shadow:0 0 15px rgba(45,212,160,0.5);transform:scale(1.05);z-index:2;font-weight:bold;}
+.key.pressed{background:var(--correct);color:var(--bg);transform:translateY(2px);}
+
 #upload-btn{padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
 
+<!-- Login Overlay -->
 <div id="auth-overlay" class="auth-overlay">
   <div class="auth-card">
     <div class="logo" style="margin-bottom:20px; font-size:2rem;">Type<em>বাংলা</em></div>
-    <h2>Sign In</h2>
-    <p>Sign in with your ATSGO account to continue.</p>
+    <h2>Welcome Back!</h2>
+    <p>Sign in with your ATSGO account to start typing.</p>
+    
     <button id="btn-google-login" class="auth-btn google">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+      <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
       Sign in with Google
     </button>
   </div>
 </div>
 
+<!-- Navigation -->
 <nav>
   <div class="nav-left">
-    <button id="profile-btn" class="profile-btn"><img id="nav-avatar" src=""></button>
+    <button id="profile-btn" class="profile-btn" title="Account Settings">
+      <img id="nav-avatar" src="" alt="User">
+    </button>
     <div class="logo">Type<em>বাংলা</em></div>
   </div>
   <input type="file" id="pdf-upload" accept=".pdf" style="display:none">
   <button id="upload-btn" onclick="document.getElementById('pdf-upload').click()">Upload PDF</button>
 
+  <!-- User Info Popup -->
   <div id="user-popup" class="user-popup">
     <div class="user-popup-header">
-      <img id="popup-avatar" src="">
-      <h3 id="popup-name">...</h3>
-      <p id="popup-email">...</p>
+      <img id="popup-avatar" src="" alt="User">
+      <h3 id="popup-name">Loading...</h3>
+      <p id="popup-email">Loading...</p>
     </div>
     <button id="btn-logout" class="logout-btn">Log Out</button>
   </div>
@@ -108,26 +147,59 @@ nav{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);padd
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="sidebar-header"><span>Lesson Parts</span><span id="progress">0/0</span></div>
+    <div class="sidebar-header">
+      <span>Lesson Parts</span>
+      <span id="progress" style="color:var(--correct);font-weight:bold;">0/0</span>
+    </div>
     <div class="lesson-list" id="lesson-list"></div>
   </aside>
+
   <div class="main">
     <div class="meanings-strip"><div class="chips" id="chips"></div></div>
     <div class="content-area">
-      <div class="text-display" id="text-display">Login and Upload PDF to start.</div>
-      <div id="keyboard" class="keyboard">
-          <!-- Simplified visual for brevity, script handles highlights -->
-          <div class="key-row"><div class="key" data-key="space">SPACE BAR</div></div>
+      <div class="text-display" id="text-display">Upload a PDF to begin typing.</div>
+
+      <!-- Enter hint -->
+      <div class="enter-hint" id="enter-hint">
+        <kbd>Enter</kbd>
+        <span>Part complete — press Enter to go to the next part</span>
+      </div>
+      
+      <div class="bn-card" id="bn-card">
+        <div style="font-size: 0.7rem; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-weight: 700;">Real Meaning</div>
+        <div class="bn-text" id="bn-text"></div>
+      </div>
+
+      <div class="keyboard" id="keyboard">
+        <div class="key-row">
+          <div class="key" data-key="`">`</div><div class="key" data-key="1">1</div><div class="key" data-key="2">2</div><div class="key" data-key="3">3</div><div class="key" data-key="4">4</div><div class="key" data-key="5">5</div><div class="key" data-key="6">6</div><div class="key" data-key="7">7</div><div class="key" data-key="8">8</div><div class="key" data-key="9">9</div><div class="key" data-key="0">0</div><div class="key" data-key="-">-</div><div class="key" data-key="=">=</div><div class="key wide" data-key="backspace">Bksp</div>
+        </div>
+        <div class="key-row">
+          <div class="key wide" data-key="tab">Tab</div><div class="key" data-key="q">Q</div><div class="key" data-key="w">W</div><div class="key" data-key="e">E</div><div class="key" data-key="r">R</div><div class="key" data-key="t">T</div><div class="key" data-key="y">Y</div><div class="key" data-key="u">U</div><div class="key" data-key="i">I</div><div class="key" data-key="o">O</div><div class="key" data-key="p">P</div><div class="key" data-key="[">[</div><div class="key" data-key="]">]</div><div class="key" data-key="\">\\</div>
+        </div>
+        <div class="key-row">
+          <div class="key wide" data-key="capslock">Caps</div><div class="key" data-key="a">A</div><div class="key" data-key="s">S</div><div class="key" data-key="d">D</div><div class="key" data-key="f">F</div><div class="key" data-key="g">G</div><div class="key" data-key="h">H</div><div class="key" data-key="j">J</div><div class="key" data-key="k">K</div><div class="key" data-key="l">L</div><div class="key" data-key=";">;</div><div class="key" data-key="'">'</div><div class="key enter" data-key="enter">Enter</div>
+        </div>
+        <div class="key-row">
+          <div class="key wide" data-key="shift">Shift</div><div class="key" data-key="z">Z</div><div class="key" data-key="x">X</div><div class="key" data-key="c">C</div><div class="key" data-key="v">V</div><div class="key" data-key="b">B</div><div class="key" data-key="n">N</div><div class="key" data-key="m">M</div><div class="key" data-key=",">,</div><div class="key" data-key=".">.</div><div class="key" data-key="/">/</div><div class="key wide" data-key="shift">Shift</div>
+        </div>
+        <div class="key-row">
+          <div class="key space" data-key="space">Space</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script type="module">
-// 1. FIREBASE INITIALIZATION
+// ---------------------------------------------------------
+// 1. FIREBASE AUTHENTICATION (ATSGO-87BF2)
+// ---------------------------------------------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+import { 
+  getAuth, signInWithPopup, GoogleAuthProvider, 
+  onAuthStateChanged, signOut 
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA5cRcoDZ33hKmmawXASdOLV5auq2OParc",
@@ -141,10 +213,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const analytics = getAnalytics(app);
 const provider = new GoogleAuthProvider();
 
-// AUTH ELEMENTS
 const authOverlay = document.getElementById('auth-overlay');
 const btnGoogleLogin = document.getElementById('btn-google-login');
 const profileBtn = document.getElementById('profile-btn');
@@ -155,94 +225,217 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     authOverlay.classList.add('hidden');
     profileBtn.style.display = 'block';
-    document.getElementById('nav-avatar').src = user.photoURL;
-    document.getElementById('popup-avatar').src = user.photoURL;
+    const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=e8512a&color=fff`;
+    document.getElementById('nav-avatar').src = avatarUrl;
+    document.getElementById('popup-avatar').src = avatarUrl;
     document.getElementById('popup-name').textContent = user.displayName;
     document.getElementById('popup-email').textContent = user.email;
   } else {
     authOverlay.classList.remove('hidden');
     profileBtn.style.display = 'none';
+    userPopup.classList.remove('show');
   }
 });
 
 btnGoogleLogin.onclick = () => signInWithPopup(auth, provider);
 btnLogout.onclick = () => signOut(auth);
 profileBtn.onclick = (e) => { e.stopPropagation(); userPopup.classList.toggle('show'); };
-window.onclick = () => userPopup.classList.remove('show');
+window.addEventListener('click', (e) => { if (!userPopup.contains(e.target) && e.target !== profileBtn) userPopup.classList.remove('show'); });
 
-// 2. APP LOGIC
+// ---------------------------------------------------------
+// 2. EXISTING TYPEBANGLA LOGIC (Preserved)
+// ---------------------------------------------------------
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const WORD_DB = { "a": "একটি", "the": "টি", "is": "হয়", "are": "হয়" };
+const banglaRegex = /[\u0980-\u09FF]/; 
 
 let LESSONS = [];
 let currentLesson = null;
 let typedText = "";
 
-document.getElementById('pdf-upload').onchange = async (e) => {
+document.getElementById('pdf-upload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    document.getElementById('text-display').textContent = "Processing PDF Parts...";
     const reader = new FileReader();
     reader.onload = async function() {
-        const typedarray = new Uint8Array(this.result);
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let text = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map(item => item.str).join(" ") + " ";
-        }
-        processText(text);
+        try {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let rawSentences = [];
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const pageText = content.items.map(item => item.str).join(" ");
+                const splitPage = pageText.match(/[^.!?]+[.!?]+/g) || [pageText];
+                rawSentences.push(...splitPage);
+            }
+            LESSONS = [];
+            let currentChunk = "";
+            let chunkId = 0;
+            rawSentences.forEach(sentence => {
+                let cleanSentence = sentence.replace(/\s+/g, ' ').trim();
+                if (cleanSentence.length < 5) return; 
+                if ((currentChunk.length + cleanSentence.length) < 120) {
+                    currentChunk += " " + cleanSentence;
+                } else {
+                    if (currentChunk.trim().length > 0) LESSONS.push({ id: chunkId++, en: currentChunk.trim(), bn: null, completed: false });
+                    currentChunk = cleanSentence;
+                }
+            });
+            if (currentChunk.trim().length > 0) LESSONS.push({ id: chunkId, en: currentChunk.trim(), bn: null, completed: false });
+            renderSidebar();
+            if(LESSONS.length > 0) loadLesson(LESSONS[0].id);
+        } catch (err) { document.getElementById('text-display').textContent = "Error: Could not read PDF."; }
     };
     reader.readAsArrayBuffer(file);
-};
-
-function processText(raw) {
-    const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
-    LESSONS = sentences.map((s, i) => ({ id: i, en: s.trim(), completed: false }));
-    loadLesson(0);
-    renderSidebar();
-}
-
-function loadLesson(id) {
-    currentLesson = LESSONS[id];
-    typedText = "";
-    renderDisplay();
-}
+});
 
 function renderSidebar() {
     const list = document.getElementById('lesson-list');
-    list.innerHTML = LESSONS.map(l => `
+    const completedCount = LESSONS.filter(l => l.completed).length;
+    document.getElementById('progress').textContent = `${completedCount}/${LESSONS.length}`;
+    list.innerHTML = LESSONS.map((l, index) => `
         <div class="li ${currentLesson?.id === l.id ? 'active' : ''} ${l.completed ? 'completed' : ''}" onclick="window.loadLesson(${l.id})">
-            Part ${l.id + 1}
+            <div class="li-text">${l.completed ? '✅ ' : `Part ${index + 1}: `}${l.en}</div>
+            <div class="actions">
+                ${!l.completed ? `<button class="icon-btn btn-check" onclick="window.manualComplete(${l.id}, event)">✔️</button>` : ''}
+                <button class="icon-btn btn-del" onclick="window.removeLesson(${l.id}, event)">🗑️</button>
+            </div>
         </div>
     `).join('');
 }
 
+window.manualComplete = function(id, event) {
+    event.stopPropagation();
+    let lesson = LESSONS.find(l => l.id === id);
+    if(lesson) lesson.completed = true;
+    if(currentLesson?.id === id) goToNextLesson(); else renderSidebar();
+};
+
+window.removeLesson = function(id, event) {
+    event.stopPropagation();
+    LESSONS = LESSONS.filter(l => l.id !== id);
+    if(currentLesson?.id === id) goToNextLesson(); else renderSidebar();
+};
+
+window.loadLesson = async function(id) {
+    currentLesson = LESSONS.find(l => l.id === id);
+    if(!currentLesson) return;
+    typedText = "";
+    document.getElementById('bn-card').classList.remove('show');
+    document.getElementById('enter-hint').classList.remove('show');
+    renderDisplay();
+    renderSidebar();
+    updateChips();
+    updateKeyboardTarget();
+    if (!currentLesson.bn) {
+        document.getElementById('bn-text').textContent = "অনুবাদ করা হচ্ছে...";
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(currentLesson.en)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            currentLesson.bn = data[0].map(item => item[0]).join('');
+            if(typedText.length > 0) document.getElementById('bn-text').textContent = currentLesson.bn;
+        } catch(err) { currentLesson.bn = "[অনুবাদে সমস্যা]"; }
+    } else { document.getElementById('bn-text').textContent = currentLesson.bn; }
+};
+
+function goToNextLesson() {
+    let currentIndex = LESSONS.findIndex(l => l.id === currentLesson?.id);
+    let nextLesson = LESSONS.slice(currentIndex + 1).find(l => !l.completed) || LESSONS.find(l => !l.completed);
+    if (nextLesson) window.loadLesson(nextLesson.id);
+    else {
+        document.getElementById('text-display').innerHTML = "<div style='text-align:center;color:var(--correct)'>🎉<br>Finished!</div>";
+        renderSidebar();
+    }
+}
+
 function renderDisplay() {
     const d = document.getElementById('text-display');
-    d.innerHTML = currentLesson.en.split('').map((ch, i) => {
+    if(!currentLesson) return;
+    let html = currentLesson.en.split('').map((ch, i) => {
         let cls = i < typedText.length ? (typedText[i] === ch ? 'ok' : 'bad') : (i === typedText.length ? 'cursor' : '');
         return `<span class="ch ${cls}">${ch}</span>`;
     }).join('');
+    d.innerHTML = html;
 }
 
-window.onkeydown = (e) => {
-    if (!currentLesson || e.ctrlKey || e.metaKey) return;
-    if (e.key === "Backspace") {
+window.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.altKey || e.metaKey || !currentLesson || currentLesson.completed) return;
+    if (e.key === " " || e.key === "Backspace") e.preventDefault();
+    flashKeyboard(e.key);
+    if (e.key === 'Enter' && typedText.length === currentLesson.en.length) {
+        currentLesson.completed = true;
+        goToNextLesson();
+        return;
+    } else if (e.key === 'Backspace') {
         typedText = typedText.slice(0, -1);
-    } else if (e.key.length === 1) {
+    } else if (e.key.length === 1 && typedText.length < currentLesson.en.length) {
         typedText += e.key;
     }
-    
-    if (typedText === currentLesson.en) {
-        currentLesson.completed = true;
-        if(LESSONS[currentLesson.id + 1]) loadLesson(currentLesson.id + 1);
-        renderSidebar();
+    document.getElementById('enter-hint').classList.toggle('show', typedText.length === currentLesson.en.length);
+    if(typedText.length > 0) {
+        document.getElementById('bn-card').classList.add('show');
+        document.getElementById('bn-text').textContent = currentLesson.bn || "...";
     }
     renderDisplay();
-};
+    updateChips();
+    updateKeyboardTarget();
+});
 
-window.loadLesson = loadLesson;
+function updateKeyboardTarget() {
+    document.querySelectorAll('.key').forEach(k => k.classList.remove('target', 'target-enter'));
+    if(!currentLesson || currentLesson.completed) return;
+    if (typedText.length === currentLesson.en.length) {
+        document.querySelector('.key[data-key="enter"]').classList.add('target-enter');
+    } else {
+        let nextChar = currentLesson.en[typedText.length].toLowerCase();
+        if (nextChar === ' ') nextChar = 'space';
+        let targetKey = document.querySelector(`.key[data-key="${nextChar}"]`);
+        if(targetKey) targetKey.classList.add('target');
+    }
+}
+
+function flashKeyboard(keyStr) {
+    let lookupKey = keyStr.toLowerCase();
+    if(lookupKey === ' ') lookupKey = 'space';
+    let targetKey = document.querySelector(`.key[data-key="${lookupKey}"]`);
+    if(targetKey) {
+        targetKey.classList.add('pressed');
+        setTimeout(() => targetKey.classList.remove('pressed'), 150);
+    }
+}
+
+async function fetchWordMeaning(word) {
+    if (WORD_DB[word] || word.length <= 1) return;
+    WORD_DB[word] = '...'; updateChips();
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(word)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        WORD_DB[word] = data[0][0][0]; updateChips();
+    } catch(e) { WORD_DB[word] = '?'; }
+}
+
+function updateChips() {
+    if(!currentLesson) return;
+    const words = currentLesson.en.split(/\s+/);
+    const typedWords = typedText.trim().split(/\s+/);
+    let currentIdx = typedWords.length - (typedText.endsWith(' ') ? 0 : 1);
+    if (currentIdx < 0) currentIdx = 0;
+    const chips = document.getElementById('chips');
+    chips.innerHTML = words.map((w, i) => {
+        const clean = w.toLowerCase().replace(/[^a-z]/g, '');
+        if (i < currentIdx - 1 || i > currentIdx + 2) return '';
+        if (!WORD_DB[clean] && i === currentIdx) fetchWordMeaning(clean);
+        return `<div class="chip ${i === currentIdx ? 'hl' : ''}">
+                <span style="font-weight:700">${w}</span>
+                ${WORD_DB[clean] && WORD_DB[clean] !== '?' ? `<span style="color:var(--accent); font-family:'Noto Sans Bengali'">${WORD_DB[clean]}</span>` : ''}
+            </div>`;
+    }).join('');
+}
 </script>
-
 </body>
 </html>
