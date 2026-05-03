@@ -1,2 +1,2 @@
 # typebangla
-A Bangla typing practice app powered by PDF
+TypeKey Bangla is a typing practice web app powered by PDF
